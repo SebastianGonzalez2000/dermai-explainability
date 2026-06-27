@@ -8,6 +8,10 @@ CS 7643 Deep Learning, Georgia Tech.
 
 See [proposal.pdf](proposal.pdf).
 
+## Dataset
+
+See [DATASET.md](DATASET.md) for an overview of HAM10000, its class imbalance, and the lesion segmentation masks we use as localization ground truth.
+
 ## Team
 
 - Xiaoyan Xing
