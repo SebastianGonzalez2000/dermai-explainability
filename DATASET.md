@@ -4,6 +4,16 @@ HAM10000 (Human Against Machine with 10000 training images) is a public collecti
 
 Source: Tschandl et al., 2018, Scientific Data. Harvard Dataverse DOI [10.7910/DVN/DBW86T](https://doi.org/10.7910/DVN/DBW86T), also mirrored on Kaggle.
 
+Download it with `python scripts/download_data.py`, which lays the files out under `data/` as follows:
+
+```
+data/
+  HAM10000_metadata
+  HAM10000_images_part_1/      5000 jpgs
+  HAM10000_images_part_2/      5015 jpgs
+  HAM10000_segmentations_lesion_tschandl/   10015 masks
+```
+
 ## What it contains
 
 - 10,015 dermoscopic (skin-surface microscope) images, 600x450 RGB, resized to 224x224 for training.
