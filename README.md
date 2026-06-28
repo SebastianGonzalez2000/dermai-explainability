@@ -8,6 +8,16 @@ CS 7643 Deep Learning, Georgia Tech.
 
 See [proposal.pdf](proposal.pdf).
 
+## Setup
+
+Install the dependencies into your Python environment:
+
+```bash
+pip install -r requirements.txt
+```
+
+The code runs unchanged on CUDA (GT PACE), Apple Silicon (MPS), and CPU; the device is detected automatically. On Apple Silicon, export `PYTORCH_ENABLE_MPS_FALLBACK=1` so any op without an MPS kernel falls back to CPU instead of erroring.
+
 ## Dataset
 
 See [DATASET.md](DATASET.md) for an overview of HAM10000, its class imbalance, and the lesion segmentation masks we use as localization ground truth.
@@ -19,6 +29,25 @@ python scripts/download_data.py
 ```
 
 This fetches HAM10000 from the Harvard Dataverse (about 2.8 GB), unzips it, and lays everything out under `data/` exactly as the project expects. Pass `--isic` to also download the optional ISIC 2018 test set. The `data/` directory is gitignored.
+
+## Fine-tuning
+
+Each run is driven entirely by a YAML config. Train a model end to end (two-stage fine-tuning followed by test-set evaluation) with:
+
+```bash
+python train.py --config configs/efficientnet.yaml
+python train.py --config configs/vit.yaml
+```
+
+On Apple Silicon, prefix with the fallback flag:
+
+```bash
+PYTORCH_ENABLE_MPS_FALLBACK=1 python train.py --config configs/vit.yaml
+```
+
+Switching models means switching config files; no code changes. Each config defines the two-stage schedule under `phases` (stage 1 trains the new classification head with the backbone frozen, stage 2 unfreezes and fine-tunes end to end at a lower learning rate). Epochs, learning rates, batch size, and seed are all set in the YAML. Override the auto-detected device with `--device cpu|mps|cuda`.
+
+The best checkpoint by validation macro-F1 is written to `outputs/<model>/best.pt`, then restored for the final test-set evaluation. The `outputs/` directory is gitignored.
 
 ## Team
 

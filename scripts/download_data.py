@@ -51,13 +51,12 @@ def download(name: str, file_id: int, dest: Path) -> None:
 
 def unzip(name: str, dest_dir: Path) -> None:
     archive = DATA_DIR / name
-    marker = dest_dir / name.replace(".zip", "")
-    if marker.exists():
-        print(f"  skip unzip {name} (already extracted)")
-        return
-    print(f"  unzip {name}")
     with zipfile.ZipFile(archive) as z:
         members = [m for m in z.namelist() if not m.startswith("__MACOSX")]
+        if all((dest_dir / m).exists() for m in members):
+            print(f"  skip unzip {name} (already extracted)")
+            return
+        print(f"  unzip {name}")
         z.extractall(dest_dir, members)
 
 

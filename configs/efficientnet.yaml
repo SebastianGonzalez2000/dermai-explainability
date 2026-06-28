@@ -1,0 +1,13 @@
+model_id: google/efficientnet-b0
+data_dir: data
+output_dir: outputs
+batch_size: 32
+num_workers: 0
+weight_decay: 0.01
+warmup_ratio: 0.1
+seed: 42
+device: auto
+
+phases:
+  - {name: head, epochs: 5, lr: 1.0e-3, unfreeze_backbone: false}
+  - {name: full, epochs: 15, lr: 1.0e-4, unfreeze_backbone: true}
