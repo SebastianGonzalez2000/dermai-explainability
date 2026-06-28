@@ -26,7 +26,7 @@ class Trainer:
         self.val_loader = data.loader("val")
         self.test_loader = data.loader("test")
         self.best_metric = 0.0
-        self.checkpoint_path = config.output_dir / config.run_name / "best.pt"
+        self.checkpoint_dir = config.output_dir / config.run_name
 
     def fit(self) -> None:
         run_timer = Timer()
@@ -35,7 +35,7 @@ class Trainer:
         logger.info("training complete in %s, best val macro-F1 %.4f", Timer.format(run_timer.elapsed()), self.best_metric)
 
     def test(self) -> dict[str, float]:
-        self.model.load_state_dict(torch.load(self.checkpoint_path, map_location=self.device))
+        self.model = type(self.model).from_pretrained(self.checkpoint_dir).to(self.device)
         metrics = self.evaluate(self.test_loader)
         logger.info("test  macro_f1 %.4f  bal_acc %.4f", metrics["macro_f1"], metrics["balanced_accuracy"])
         return metrics
@@ -88,5 +88,5 @@ class Trainer:
         if metric <= self.best_metric:
             return
         self.best_metric = metric
-        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(self.model.state_dict(), self.checkpoint_path)
+        self.model.save_pretrained(self.checkpoint_dir)
+        self.data.processor.save_pretrained(self.checkpoint_dir)
