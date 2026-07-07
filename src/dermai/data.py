@@ -27,7 +27,7 @@ class HAM10000Dataset(Dataset):
         image = Image.open(self.image_paths[row.image_id]).convert("RGB")
         pixel_values = self.processor(image, return_tensors="pt")["pixel_values"][0]
         label = torch.tensor(LABEL_TO_INDEX[row.dx], dtype=torch.long)
-        return {"pixel_values": pixel_values, "labels": label}
+        return {"pixel_values": pixel_values, "labels": label, "image_id": row.image_id}
 
 
 class DataModule:
