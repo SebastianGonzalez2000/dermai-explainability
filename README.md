@@ -30,6 +30,23 @@ python scripts/download_data.py
 
 This fetches HAM10000 from the Harvard Dataverse (about 2.8 GB), unzips it, and lays everything out under `data/` exactly as the project expects. Pass `--isic` to also download the optional ISIC 2018 test set. The `data/` directory is gitignored.
 
+## Attention-rollout heatmaps
+For the ViT (ViT-B/16), generate attention-rollout heatmaps over a split's images with:
+```bash
+python explain_attrollout.py --config configs/vit.yaml --checkpoint sgonzalez2000/dermai-vit-base-patch16-224
+```
+This writes one overlay PNG per image (named `<image_id>__true-<class>__pred-<class>.png`) to
+`outputs/rollout/<checkpoint-name>/test/` by default — the same naming scheme as Grad-CAM, so ViT and
+CNN heatmaps for a given image line up by filename. Pass `--split train|val|test`, `--output` to choose
+a different directory, or `--zip` to also produce a `.zip` archive. Rollout-specific knobs: `--head-fusion
+mean|max|min` (how per-head attention is combined, default `mean`) and `--discard-ratio` (fraction of
+lowest-attention entries zeroed per row before rollout, default `0.0`).
+
+The `AttentionRollout` class
+(in `src/dermai/attrollout.py`) reads every layer's attention matrix from the model's `output_attentions`. Note that the model must be loaded with
+`attn_implementation="eager"` — transformers 5.x defaults to the fused SDPA kernel, which does not return
+attention weights and would leave rollout with nothing to work from.
+
 ## Fine-tuning
 
 Each run is driven entirely by a YAML config. Train a model end to end (two-stage fine-tuning followed by test-set evaluation) with:
