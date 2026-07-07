@@ -3,6 +3,8 @@ import shutil
 import sys
 from pathlib import Path
 
+import torch
+
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from dermai.config import Config
@@ -21,6 +23,12 @@ def main() -> None:
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--output", default=None, help="defaults to <output_dir>/gradcam/<checkpoint-name>/<split>")
     parser.add_argument("--alpha", type=float, default=0.45, help="heatmap overlay opacity")
+    parser.add_argument(
+        "--target",
+        default="predicted",
+        choices=["predicted", "true"],
+        help="which class's logit to explain: the model's own prediction, or the ground-truth label",
+    )
     parser.add_argument("--zip", action="store_true", help="also archive the output directory as a .zip")
     parser.add_argument("--device", default=None)
     args = parser.parse_args()
@@ -30,7 +38,6 @@ def main() -> None:
 
     processor = ModelFactory.processor(args.checkpoint)
     model = ModelFactory.load(args.checkpoint).to(device)
-    target_layer = ModelFactory.cam_target_layer(model)
 
     data = DataModule(config.data_dir, processor, config.batch_size, config.num_workers, config.seed)
     data.setup()
@@ -43,17 +50,21 @@ def main() -> None:
     mean, std = processor.image_mean, processor.image_std
     timer = Timer()
     written = 0
-    with GradCAM(model, target_layer) as gradcam:
+    with GradCAM(model) as gradcam:
         for batch in loader:
             pixel_values = batch["pixel_values"].to(device)
-            labels = batch["labels"]
-            result = gradcam(pixel_values)
+            labels = batch["labels"].to(device)
+            with torch.no_grad():
+                predicted = model(pixel_values=pixel_values).logits.argmax(dim=1)
+            target_class = labels if args.target == "true" else predicted
+            result = gradcam(pixel_values, target_class=target_class)
             for i, image_id in enumerate(batch["image_id"]):
                 image = denormalize_image(pixel_values[i], mean, std)
                 overlay = overlay_heatmap(image, result.cam[i], alpha=args.alpha)
                 true_name = CLASSES[labels[i].item()]
-                pred_name = CLASSES[result.target_class[i].item()]
-                overlay.save(output_dir / f"{image_id}__true-{true_name}__pred-{pred_name}.png")
+                pred_name = CLASSES[predicted[i].item()]
+                cam_name = CLASSES[target_class[i].item()]
+                overlay.save(output_dir / f"{image_id}__true-{true_name}__pred-{pred_name}__cam-{cam_name}.png")
                 written += 1
 
     logger.info("wrote %d heatmaps in %s", written, Timer.format(timer.elapsed()))

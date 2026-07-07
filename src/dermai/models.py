@@ -38,15 +38,3 @@ class ModelFactory:
         for name, parameter in model.named_parameters():
             if not name.startswith("classifier"):
                 parameter.requires_grad = trainable
-
-    @staticmethod
-    def cam_target_layer(model: nn.Module) -> nn.Module:
-        """The last conv feature map before pooling, for each CNN architecture we support.
-
-        Keeping this mapping here (rather than in the Grad-CAM framework itself) means
-        adding a new CNN backbone only requires one line here; GradCAM stays architecture-agnostic.
-        """
-        backbone = getattr(model, "efficientnet", None)
-        if backbone is not None:
-            return backbone.encoder.top_activation
-        raise ValueError(f"no Grad-CAM target layer registered for {type(model).__name__}")
