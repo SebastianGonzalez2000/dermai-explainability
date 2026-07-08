@@ -3,17 +3,13 @@ import shutil
 import sys
 from pathlib import Path
 
-# explain_attrollout.py is at the project root; the dermai package is src/dermai/.
-# The directory that contains the dermai package is <project root>/src, i.e. this
-# file's own parent joined with "src".
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from dermai.attrollout import AttentionRollout, RolloutConfig
 from dermai.config import Config
 from dermai.data import CLASSES, DataModule
-from dermai.gradcam import denormalize_image, overlay_heatmap  # shared image utilities, not GradCAM-specific
 from dermai.models import ModelFactory
-from dermai.utils import Timer, get_logger, pick_device
+from dermai.utils import Timer, get_logger, pick_device, denormalize_image, overlay_heatmap
 
 logger = get_logger()
 
@@ -64,13 +60,14 @@ def main() -> None:
     written = 0
     for batch in loader:
         pixel_values = batch["pixel_values"].to(device)
-        labels = batch["labels"]
+        labels = batch["labels"].to(device)
         result = rollout(pixel_values)
+        predicted = result.logits.argmax(dim=1)
         for i, image_id in enumerate(batch["image_id"]):
             image = denormalize_image(pixel_values[i], mean, std)
             overlay = overlay_heatmap(image, result.heatmap[i], alpha=args.alpha)
             true_name = CLASSES[labels[i].item()]
-            pred_name = CLASSES[result.target_class[i].item()]
+            pred_name = CLASSES[predicted[i].item()]
             overlay.save(output_dir / f"{image_id}__true-{true_name}__pred-{pred_name}.png")
             written += 1
     logger.info("wrote %d heatmaps in %s", written, Timer.format(timer.elapsed()))

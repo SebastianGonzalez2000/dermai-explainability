@@ -4,8 +4,8 @@ import time
 
 import numpy as np
 import torch
-from matplotlib import colormaps
 from PIL import Image
+from matplotlib import colormaps
 
 LOGGER_NAME = "dermai"
 
@@ -35,7 +35,6 @@ def set_seed(seed: int) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-
 
 def denormalize_image(pixel_values: torch.Tensor, mean: list[float], std: list[float]) -> Image.Image:
     """Undo a HF image processor's normalization to recover the image the model saw."""
