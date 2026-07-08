@@ -3,6 +3,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -59,12 +60,16 @@ def main() -> None:
             target_class = labels if args.target == "true" else predicted
             result = gradcam(pixel_values, target_class=target_class)
             for i, image_id in enumerate(batch["image_id"]):
-                image = denormalize_image(pixel_values[i], mean, std)
-                overlay = overlay_heatmap(image, result.cam[i], alpha=args.alpha)
                 true_name = CLASSES[labels[i].item()]
                 pred_name = CLASSES[predicted[i].item()]
                 cam_name = CLASSES[target_class[i].item()]
-                overlay.save(output_dir / f"{image_id}__true-{true_name}__pred-{pred_name}__cam-{cam_name}.png")
+                stem = f"{image_id}__true-{true_name}__pred-{pred_name}__cam-{cam_name}"
+
+                np.save(output_dir / f"{stem}.npy", result.cam[i].detach().cpu().numpy())
+
+                image = denormalize_image(pixel_values[i], mean, std)
+                overlay = overlay_heatmap(image, result.cam[i], alpha=args.alpha)
+                overlay.save(output_dir / f"{stem}.png")
                 written += 1
 
     logger.info("wrote %d heatmaps in %s", written, Timer.format(timer.elapsed()))
