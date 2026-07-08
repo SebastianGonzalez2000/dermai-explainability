@@ -4,6 +4,8 @@ import time
 
 import numpy as np
 import torch
+from matplotlib import colormaps
+from PIL import Image
 
 LOGGER_NAME = "dermai"
 
@@ -33,6 +35,21 @@ def set_seed(seed: int) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
+
+def denormalize_image(pixel_values: torch.Tensor, mean: list[float], std: list[float]) -> Image.Image:
+    """Undo a HF image processor's normalization to recover the image the model saw."""
+    mean_t = torch.tensor(mean).view(-1, 1, 1)
+    std_t = torch.tensor(std).view(-1, 1, 1)
+    image = (pixel_values.detach().cpu() * std_t + mean_t).clamp(0, 1)
+    array = (image.permute(1, 2, 0).numpy() * 255).round().astype(np.uint8)
+    return Image.fromarray(array)
+
+
+def overlay_heatmap(image: Image.Image, cam: torch.Tensor, alpha: float = 0.45) -> Image.Image:
+    heatmap = (colormaps["jet"](cam.detach().cpu().numpy())[:, :, :3] * 255).astype(np.uint8)
+    heatmap_image = Image.fromarray(heatmap).resize(image.size, resample=Image.BILINEAR)
+    return Image.blend(image.convert("RGB"), heatmap_image, alpha)
 
 
 class Timer:

@@ -9,9 +9,9 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from dermai.config import Config
 from dermai.data import CLASSES, DataModule
-from dermai.gradcam import GradCAM, denormalize_image, overlay_heatmap
+from dermai.gradcam import GradCAM
 from dermai.models import ModelFactory
-from dermai.utils import Timer, get_logger, pick_device
+from dermai.utils import Timer, denormalize_image, get_logger, overlay_heatmap, pick_device
 
 logger = get_logger()
 

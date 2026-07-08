@@ -57,11 +57,11 @@ For the CNN (EfficientNet-B0), generate Grad-CAM heatmaps over a split's images 
 python explain_gradcam.py --config configs/efficientnet.yaml --checkpoint sgonzalez2000/dermai-efficientnet-b0
 ```
 
-This writes one overlay PNG per image (named `<image_id>__true-<class>__pred-<class>.png`) to
-`outputs/gradcam/<checkpoint-name>/test/` by default. Pass `--split train|val|test`, `--output` to
-choose a different directory, or `--zip` to also produce a `.zip` archive of the output directory.
-`ModelFactory.cam_target_layer` maps each supported CNN architecture to the conv layer Grad-CAM hooks
-into; the `GradCAM` class itself (in `src/dermai/gradcam.py`) is architecture-agnostic.
+This writes one overlay PNG per image (named `<image_id>__true-<class>__pred-<class>__cam-<class>.png`)
+to `outputs/gradcam/<checkpoint-name>/test/` by default. Pass `--split train|val|test`, `--output` to
+choose a different directory, `--target predicted|true` to choose which class's logit Grad-CAM explains,
+or `--zip` to also produce a `.zip` archive of the output directory. `GradCAM` (in `src/dermai/gradcam.py`)
+is specific to this project's CNN, EfficientNet-B0.
 
 ## Publishing a fine-tuned model
 
