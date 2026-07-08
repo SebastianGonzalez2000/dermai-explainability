@@ -3,6 +3,8 @@ import shutil
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from dermai.attrollout import AttentionRollout, RolloutConfig
@@ -12,7 +14,6 @@ from dermai.models import ModelFactory
 from dermai.utils import Timer, get_logger, pick_device, denormalize_image, overlay_heatmap
 
 logger = get_logger()
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate attention-rollout heatmaps for a ViT checkpoint")
@@ -50,6 +51,8 @@ def main() -> None:
         else config.output_dir / "rollout" / Path(args.checkpoint).name / args.split
     )
     output_dir.mkdir(parents=True, exist_ok=True)
+    arrays_dir = output_dir / "arrays"
+    arrays_dir.mkdir(parents=True, exist_ok=True)
     logger.info("model %s  split %s  %d images -> %s", args.checkpoint, args.split, len(data.splits[args.split]), output_dir)
 
     mean, std = processor.image_mean, processor.image_std
@@ -64,11 +67,13 @@ def main() -> None:
         result = rollout(pixel_values)
         predicted = result.logits.argmax(dim=1)
         for i, image_id in enumerate(batch["image_id"]):
-            image = denormalize_image(pixel_values[i], mean, std)
-            overlay = overlay_heatmap(image, result.heatmap[i], alpha=args.alpha)
             true_name = CLASSES[labels[i].item()]
             pred_name = CLASSES[predicted[i].item()]
-            overlay.save(output_dir / f"{image_id}__true-{true_name}__pred-{pred_name}.png")
+            stem = f"{image_id}__true-{true_name}__pred-{pred_name}"
+            np.save(arrays_dir / f"{stem}.npy", result.heatmap[i].cpu().numpy())
+            image = denormalize_image(pixel_values[i], mean, std)
+            overlay = overlay_heatmap(image, result.heatmap[i], alpha=args.alpha)
+            overlay.save(output_dir / f"{stem}.png")
             written += 1
     logger.info("wrote %d heatmaps in %s", written, Timer.format(timer.elapsed()))
 
