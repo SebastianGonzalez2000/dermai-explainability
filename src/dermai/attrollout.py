@@ -22,8 +22,6 @@ class RolloutConfig:
 
 @dataclass
 class RolloutOutput:
-    """Mirrors gradcam.CAMOutput's shape so downstream code (IoU, deletion/insertion)
-    can treat both explainers' outputs the same way."""
 
     heatmap: torch.Tensor       # (batch, height, width), normalized to [0, 1]
     target_class: torch.Tensor  # (batch,)
@@ -33,17 +31,7 @@ class RolloutOutput:
 class AttentionRollout:
     """Attention rollout (Abnar & Zuidema, 2020) for any HF ViT-style model that
     exposes per-layer attention weights via output_attentions=True.
-
-    Mirrors GradCAM's calling convention (construct with a model, call with a
-    batch of pixel_values) but is structurally simpler: no target layer, no
-    hooks, no backward pass. Load the model the same way GradCAM's caller
-    does -- via ModelFactory.load(checkpoint) -- and hand it in directly:
-
-        model = ModelFactory.load(checkpoint).to(device)
-        rollout = AttentionRollout(model)
-        result = rollout(pixel_values)  # RolloutOutput
     """
-
     def __init__(self, model: torch.nn.Module, config: RolloutConfig | None = None) -> None:
         self.model = model
         self.config = config or RolloutConfig()
@@ -65,16 +53,6 @@ class AttentionRollout:
     @torch.no_grad()
     def __call__(self, pixel_values: torch.Tensor, target_class: torch.Tensor | None = None) -> RolloutOutput:
         """pixel_values: (B, 3, H, W) already preprocessed for the model.
-
-        target_class is accepted only to mirror GradCAM's call signature and
-        to let callers record which class was predicted (e.g. for filenames,
-        as explain_gradcam.py does). It does NOT affect the heatmap: rollout
-        has no backward pass and no notion of "explain class X" -- the same
-        heatmap is returned regardless of what you pass here. If omitted, the
-        predicted class (argmax of logits) is filled in and returned as-is.
-        This is a real difference from Grad-CAM worth noting in the report:
-        Grad-CAM answers "what drove *this* prediction," rollout answers
-        "what did the model attend to," independent of the outcome.
         """
         was_training = self.model.training
         self.model.eval()
