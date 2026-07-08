@@ -26,6 +26,10 @@ class ModelFactory:
         )
 
     @staticmethod
+    def load(checkpoint: str) -> nn.Module:
+        return AutoModelForImageClassification.from_pretrained(checkpoint)
+
+    @staticmethod
     def processor(model_id: str):
         return AutoImageProcessor.from_pretrained(model_id)
 

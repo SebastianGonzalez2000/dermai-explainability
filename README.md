@@ -49,6 +49,20 @@ Switching models means switching config files; no code changes. Each config defi
 
 The best checkpoint by validation macro-F1 is saved in Hugging Face format to `outputs/<model>/`, then restored for the final test-set evaluation. The `outputs/` directory is gitignored.
 
+## Grad-CAM heatmaps
+
+For the CNN (EfficientNet-B0), generate Grad-CAM heatmaps over a split's images with:
+
+```bash
+python explain_gradcam.py --config configs/efficientnet.yaml --checkpoint sgonzalez2000/dermai-efficientnet-b0
+```
+
+This writes one overlay PNG per image (named `<image_id>__true-<class>__pred-<class>__cam-<class>.png`)
+to `outputs/gradcam/<checkpoint-name>/test/` by default. Pass `--split train|val|test`, `--output` to
+choose a different directory, `--target predicted|true` to choose which class's logit Grad-CAM explains,
+or `--zip` to also produce a `.zip` archive of the output directory. `GradCAM` (in `src/dermai/gradcam.py`)
+is specific to this project's CNN, EfficientNet-B0.
+
 ## Publishing a fine-tuned model
 
 After you have run the fine-tuning workflow, you can push your trained checkpoint to the Hugging Face Hub so downstream experiments can load it directly instead of retraining. Authenticate once with a write token, then run the upload script with the checkpoint folder name:
