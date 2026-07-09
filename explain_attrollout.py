@@ -51,8 +51,6 @@ def main() -> None:
         else config.output_dir / "rollout" / Path(args.checkpoint).name / args.split
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    arrays_dir = output_dir / "arrays"
-    arrays_dir.mkdir(parents=True, exist_ok=True)
     logger.info("model %s  split %s  %d images -> %s", args.checkpoint, args.split, len(data.splits[args.split]), output_dir)
 
     mean, std = processor.image_mean, processor.image_std
@@ -70,7 +68,7 @@ def main() -> None:
             true_name = CLASSES[labels[i].item()]
             pred_name = CLASSES[predicted[i].item()]
             stem = f"{image_id}__true-{true_name}__pred-{pred_name}"
-            np.save(arrays_dir / f"{stem}.npy", result.heatmap[i].cpu().numpy())
+            np.save(output_dir / f"{stem}.npy", result.heatmap[i].detach().cpu().numpy())
             image = denormalize_image(pixel_values[i], mean, std)
             overlay = overlay_heatmap(image, result.heatmap[i], alpha=args.alpha)
             overlay.save(output_dir / f"{stem}.png")
