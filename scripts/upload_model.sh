@@ -40,6 +40,7 @@ base_model="google/${model_name}"
 cat > "${checkpoint_dir}/README.md" <<EOF
 ---
 base_model: ${base_model}
+library_name: transformers
 license: apache-2.0
 tags:
   - image-classification

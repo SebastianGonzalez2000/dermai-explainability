@@ -90,7 +90,7 @@ scripts/upload_model.sh efficientnet-b0
 scripts/upload_model.sh vit-base-patch16-224
 ```
 
-This creates a public model repo under your account and uploads the model and its preprocessor. Anyone can then load it with `AutoModelForImageClassification.from_pretrained("<your-username>/dermai-<model>")`. Set `HF_USER` at the top of the script to your own username before pushing.
+This creates a public model repo under the account you logged in as and uploads the model and its preprocessor. Anyone can then load it with `AutoModelForImageClassification.from_pretrained("<your-username>/dermai-<model>")`. The repo owner defaults to your logged-in Hugging Face account; pass a username as a second argument to override it, for example `scripts/upload_model.sh efficientnet-b0 someusername`.
 
 ## Team
 
