@@ -43,11 +43,13 @@ class LocalizationEvaluator:
         "otsu"        -> automatic Otsu threshold (no threshold_value needed)
     """
 
-    def __init__(self, threshold_method: str = "percentile", threshold_value: float = 80.0) -> None:
+    def __init__(self, threshold_method: str = "percentile", threshold_value: float = 80.0,
+                 pointing_tolerance: int = 15) -> None:
         if threshold_method not in {"percentile", "fixed", "otsu"}:
             raise ValueError(f"unknown threshold_method: {threshold_method}")
         self.threshold_method = threshold_method
         self.threshold_value = threshold_value
+        self.pointing_tolerance = pointing_tolerance
 
     # ------------------------------------------------------------------
     # Thresholding: continuous heatmap -> binary "attended region" mask
@@ -104,8 +106,25 @@ class LocalizationEvaluator:
         return float(intersection) / float(union)
 
     def compute_pointing_game(self, heatmap: np.ndarray, gt_mask: np.ndarray) -> bool:
-        peak_idx = np.unravel_index(np.argmax(heatmap), heatmap.shape)
-        return bool(gt_mask[peak_idx])
+        peak_row, peak_col = np.unravel_index(np.argmax(heatmap), heatmap.shape)
+        gt_mask = gt_mask.astype(bool)
+        if gt_mask[peak_row, peak_col]:
+            return True
+        if self.pointing_tolerance <= 0:
+            return False
+        return self._within_tolerance(gt_mask, peak_row, peak_col)
+
+    def _within_tolerance(self, gt_mask: np.ndarray, peak_row: int, peak_col: int) -> bool:
+        tau = self.pointing_tolerance
+        rows, cols = gt_mask.shape
+        row_lo, row_hi = max(0, peak_row - tau), min(rows, peak_row + tau + 1)
+        col_lo, col_hi = max(0, peak_col - tau), min(cols, peak_col + tau + 1)
+        window = gt_mask[row_lo:row_hi, col_lo:col_hi]
+        if not window.any():
+            return False
+        window_rows, window_cols = np.nonzero(window)
+        distances_squared = (window_rows + row_lo - peak_row) ** 2 + (window_cols + col_lo - peak_col) ** 2
+        return bool((distances_squared <= tau * tau).any())
 
     def evaluate_single(self, heatmap: np.ndarray, gt_mask: np.ndarray, image_id: str = "") -> LocalizationResult:
         if heatmap.shape != gt_mask.shape:
