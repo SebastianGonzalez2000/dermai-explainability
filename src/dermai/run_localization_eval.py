@@ -38,25 +38,7 @@ import numpy as np
 from PIL import Image
 
 from localization import LocalizationEvaluator, summarize
-
-
-def build_image_id_to_path(heatmap_dir: Path) -> dict[str, Path]:
-    """Scans heatmap_dir for *.npy files and maps image_id -> full path.
-
-    Handles both naming styles:
-      - simple:   ISIC_0024313.npy
-      - compound: ISIC_0024313__true-mel__pred-nv__cam-nv.npy  (Ariel's convention)
-    """
-    mapping: dict[str, Path] = {}
-    for path in sorted(Path(heatmap_dir).glob("*.npy")):
-        image_id = path.stem.split("__")[0]
-        if image_id in mapping:
-            raise ValueError(
-                f"duplicate image_id {image_id!r} found in {heatmap_dir} "
-                f"({mapping[image_id].name} and {path.name}) -- check for accidental re-runs/duplicates"
-            )
-        mapping[image_id] = path
-    return mapping
+from utils import build_image_id_to_path
 
 
 def main() -> None:

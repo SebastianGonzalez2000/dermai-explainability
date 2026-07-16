@@ -1,6 +1,7 @@
 import logging
 import random
 import time
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -49,6 +50,18 @@ def overlay_heatmap(image: Image.Image, cam: torch.Tensor, alpha: float = 0.45) 
     heatmap = (colormaps["jet"](cam.detach().cpu().numpy())[:, :, :3] * 255).astype(np.uint8)
     heatmap_image = Image.fromarray(heatmap).resize(image.size, resample=Image.BILINEAR)
     return Image.blend(image.convert("RGB"), heatmap_image, alpha)
+
+
+def build_image_id_to_path(heatmap_dir: Path) -> dict[str, Path]:
+    """Maps image_id -> heatmap .npy path, recovering the id from the first
+    "__"-separated token (image_ids contain a single underscore, e.g. ISIC_0024313)."""
+    mapping: dict[str, Path] = {}
+    for path in sorted(Path(heatmap_dir).glob("*.npy")):
+        image_id = path.stem.split("__")[0]
+        if image_id in mapping:
+            raise ValueError(f"duplicate image_id {image_id!r} in {heatmap_dir} ({mapping[image_id].name}, {path.name})")
+        mapping[image_id] = path
+    return mapping
 
 
 class Timer:
