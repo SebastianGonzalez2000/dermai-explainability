@@ -50,10 +50,12 @@ class Trainer:
         steps = phase.epochs * len(self.train_loader)
         scheduler = get_linear_schedule_with_warmup(optimizer, int(self.config.warmup_ratio * steps), steps)
         for epoch in range(1, phase.epochs + 1):
-            self._train_epoch(optimizer, scheduler, phase.name, epoch)
+            self._train_epoch(optimizer, scheduler, phase, epoch)
 
-    def _train_epoch(self, optimizer, scheduler, phase_name: str, epoch: int) -> None:
+    def _train_epoch(self, optimizer, scheduler, phase: Phase, epoch: int) -> None:
         self.model.train()
+        if not phase.unfreeze_backbone:
+            ModelFactory.freeze_norm_statistics(self.model)
         timer = Timer()
         running_loss = 0.0
         for batch in self.train_loader:
@@ -70,7 +72,7 @@ class Trainer:
         train_loss = running_loss / len(self.train_loader)
         metrics = self.evaluate(self.val_loader)
         logger.info("[%s] epoch %d  train_loss %.4f  val_macro_f1 %.4f  val_bal_acc %.4f  (%s)",
-                    phase_name, epoch, train_loss, metrics["macro_f1"], metrics["balanced_accuracy"], Timer.format(timer.elapsed()))
+                    phase.name, epoch, train_loss, metrics["macro_f1"], metrics["balanced_accuracy"], Timer.format(timer.elapsed()))
         self._save_if_best(metrics["macro_f1"])
 
     @torch.no_grad()

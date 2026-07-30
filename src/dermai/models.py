@@ -38,3 +38,10 @@ class ModelFactory:
         for name, parameter in model.named_parameters():
             if not name.startswith("classifier"):
                 parameter.requires_grad = trainable
+
+    @staticmethod
+    def freeze_norm_statistics(model: nn.Module) -> None:
+        """requires_grad=False leaves batch-norm running statistics updating, so hold them in eval mode too."""
+        for module in model.modules():
+            if isinstance(module, nn.modules.batchnorm._BatchNorm):
+                module.eval()
