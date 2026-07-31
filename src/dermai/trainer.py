@@ -71,10 +71,15 @@ class Trainer:
         steps = phase.epochs * len(self.train_loader)
         scheduler = get_linear_schedule_with_warmup(optimizer, int(self.config.warmup_ratio * steps), steps)
         for epoch in range(1, phase.epochs + 1):
-            self._train_epoch(optimizer, scheduler, phase.name, epoch)
+            self._train_epoch(optimizer, scheduler, phase, epoch)
 
-    def _train_epoch(self, optimizer, scheduler, phase_name: str, epoch: int) -> None:
+    def _train_epoch(self, optimizer, scheduler, phase: Phase, epoch: int) -> None:
         self.model.train()
+        if phase.unfreeze_depth == 0:
+            # Fully-frozen-backbone phase: requires_grad=False alone doesn't stop
+            # BatchNorm running statistics from updating, so hold them in eval
+            # mode too -- otherwise "frozen" backbone stats still drift.
+            ModelFactory.freeze_norm_statistics(self.model)
         timer = Timer()
         running_loss = 0.0
         for batch in self.train_loader:
@@ -95,9 +100,9 @@ class Trainer:
         train_metrics = self.evaluate(self.train_loader)
         val_metrics = self.evaluate(self.val_loader)
         logger.info("[%s] epoch %d  train_loss %.4f  train_macro_f1 %.4f  val_macro_f1 %.4f  val_bal_acc %.4f  (%s)",
-                    phase_name, epoch, train_loss, train_metrics["macro_f1"],
+                    phase.name, epoch, train_loss, train_metrics["macro_f1"],
                     val_metrics["macro_f1"], val_metrics["balanced_accuracy"], Timer.format(timer.elapsed()))
-        self._log_ablation_row(phase_name, epoch, train_loss, train_metrics, val_metrics)
+        self._log_ablation_row(phase.name, epoch, train_loss, train_metrics, val_metrics)
         self._save_if_best(val_metrics["macro_f1"])
 
     def _log_ablation_row(self, phase_name: str, epoch: int, train_loss: float,

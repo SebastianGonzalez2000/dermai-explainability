@@ -136,6 +136,13 @@ class ModelFactory:
                 parameter.requires_grad = True
 
     @staticmethod
+    def freeze_norm_statistics(model: nn.Module) -> None:
+        """requires_grad=False leaves batch-norm running statistics updating, so hold them in eval mode too."""
+        for module in model.modules():
+            if isinstance(module, nn.modules.batchnorm._BatchNorm):
+                module.eval()
+
+    @staticmethod
     def _backbone_blocks(model: nn.Module):
         model_type = getattr(model.config, "model_type", None)
         if model_type == "vit":

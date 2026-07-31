@@ -8,11 +8,11 @@ augment: True
 num_workers: 4
 weight_decay: 0.01
 warmup_ratio: 0.1
-class_weighted_loss: false
+class_weighted_loss: True
 seed: 42
 device: auto
 
-experiment_tag: vit_unfreeze_all
+experiment_tag: EN_best_hyparam
 
 phases:
   - name: warmup

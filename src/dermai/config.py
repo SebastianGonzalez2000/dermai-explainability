@@ -21,6 +21,8 @@ class Phase:
 
     @classmethod
     def from_dict(cls, raw: dict) -> "Phase":
+        # Backward compatibility: older configs used a boolean unfreeze_backbone
+        # (True = fully unfrozen, False = classifier-only frozen backbone).
         raw = dict(raw)
         if "unfreeze_backbone" in raw and "unfreeze_depth" not in raw:
             legacy = raw.pop("unfreeze_backbone")
