@@ -173,8 +173,6 @@ class ModelFactory:
 
     @staticmethod
     def describe_dropout(model: nn.Module) -> dict[str, float | None]:
-        """Sanity-check helper: reports the dropout values actually set on the
-        built model's config, so you can confirm an override took effect."""
         model_type = getattr(model.config, "model_type", None)
         if model_type == "vit":
             return {
@@ -194,7 +192,5 @@ class ModelFactory:
 
     @staticmethod
     def describe_backbone(model: nn.Module) -> dict[str, int]:
-        """Sanity-check helper: prints how many blocks are available to unfreeze,
-        so you can pick sensible depths before running the ablation sweep."""
         blocks = ModelFactory._backbone_blocks(model)
         return {"model_type": model.config.model_type, "num_blocks": len(blocks)}

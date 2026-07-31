@@ -12,3 +12,6 @@ venv/
 
 # Training outputs
 outputs/
+
+# Faithfulness per-image curve arrays (regenerable, large; keep the CSVs/table/figure)
+results/*.npz

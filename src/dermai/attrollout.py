@@ -91,19 +91,21 @@ class AttentionRollout:
         raise ValueError(f"Unknown head_fusion: {self.config.head_fusion}")
 
     def _apply_discard(self, fused: torch.Tensor) -> torch.Tensor:
-        """Zero out the lowest discard_ratio fraction of attention per row,
-        then renormalize. No-op when discard_ratio == 0."""
+        """Zero out the globally lowest discard_ratio fraction of attention
+        entries, protecting the CLS self entry so the class token is never
+        dropped. No-op when discard_ratio == 0. Rows are renormalized after
+        residual augmentation in _rollout, matching Abnar & Zuidema."""
         if self.config.discard_ratio <= 0.0:
             return fused
         B, N, _ = fused.shape
-        k = int(N * self.config.discard_ratio)
+        flat = fused.reshape(B, N * N)
+        k = int(N * N * self.config.discard_ratio)
         if k == 0:
             return fused
-        flat = fused.view(B, N, N)
         _, idx = flat.topk(k, dim=-1, largest=False)
-        flat = flat.scatter(-1, idx, 0.0)
-        flat = flat / flat.sum(dim=-1, keepdim=True).clamp_min(1e-8)
-        return flat
+        discard = torch.zeros_like(flat, dtype=torch.bool).scatter_(-1, idx, True)
+        discard[:, 0] = False
+        return flat.masked_fill(discard, 0.0).view(B, N, N)
 
     def _rollout(self, attentions: tuple[torch.Tensor, ...]) -> torch.Tensor:
         """Fuses heads, applies residual augmentation, and multiplies attention

@@ -38,25 +38,7 @@ import numpy as np
 from PIL import Image
 
 from localization import LocalizationEvaluator, summarize
-
-
-def build_image_id_to_path(heatmap_dir: Path) -> dict[str, Path]:
-    """Scans heatmap_dir for *.npy files and maps image_id -> full path.
-
-    Handles both naming styles:
-      - simple:   ISIC_0024313.npy
-      - compound: ISIC_0024313__true-mel__pred-nv__cam-nv.npy  (Ariel's convention)
-    """
-    mapping: dict[str, Path] = {}
-    for path in sorted(Path(heatmap_dir).glob("*.npy")):
-        image_id = path.stem.split("__")[0]
-        if image_id in mapping:
-            raise ValueError(
-                f"duplicate image_id {image_id!r} found in {heatmap_dir} "
-                f"({mapping[image_id].name} and {path.name}) -- check for accidental re-runs/duplicates"
-            )
-        mapping[image_id] = path
-    return mapping
+from utils import build_image_id_to_path
 
 
 def main() -> None:
@@ -70,6 +52,8 @@ def main() -> None:
     parser.add_argument("--threshold-method", default="percentile",
                         choices=["percentile", "fixed", "otsu"])
     parser.add_argument("--threshold-value", type=float, default=80.0)
+    parser.add_argument("--pointing-tolerance", type=int, default=15,
+                        help="pointing-game hit tolerance in pixels (Zhang et al. default 15; 0 = exact pixel)")
     parser.add_argument("--mask-suffix", default="_segmentation.png")
     args = parser.parse_args()
 
@@ -77,7 +61,8 @@ def main() -> None:
     print(f"found {len(id_to_path)} heatmap files for {args.model_name}")
 
     evaluator = LocalizationEvaluator(
-        threshold_method=args.threshold_method, threshold_value=args.threshold_value)
+        threshold_method=args.threshold_method, threshold_value=args.threshold_value,
+        pointing_tolerance=args.pointing_tolerance)
 
     results = []
     missing_masks = []
