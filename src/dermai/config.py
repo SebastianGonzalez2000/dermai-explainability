@@ -12,6 +12,7 @@ class Phase:
     epochs: int
     lr: float
     unfreeze_backbone: bool
+    block_span: str | None = None
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ class Config:
     warmup_ratio: float = 0.1
     seed: int = 42
     device: str = "auto"
+    run_name_suffix: str = ""
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> Config:
@@ -37,4 +39,4 @@ class Config:
 
     @property
     def run_name(self) -> str:
-        return self.model_id.split("/")[-1]
+        return self.model_id.split("/")[-1] + self.run_name_suffix

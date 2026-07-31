@@ -41,10 +41,14 @@ class Trainer:
         return metrics
 
     def _run_phase(self, phase: Phase) -> None:
-        ModelFactory.set_backbone_trainable(self.model, phase.unfreeze_backbone)
+        if phase.block_span:
+            ModelFactory.set_block_span_trainable(self.model, phase.block_span)
+        else:
+            ModelFactory.set_backbone_trainable(self.model, phase.unfreeze_backbone)
         trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        scope = phase.block_span or ("unfrozen" if phase.unfreeze_backbone else "frozen")
         logger.info("phase '%s': %d epochs, lr %.0e, backbone %s, %d trainable params",
-                    phase.name, phase.epochs, phase.lr, "unfrozen" if phase.unfreeze_backbone else "frozen", trainable)
+                    phase.name, phase.epochs, phase.lr, scope, trainable)
         optimizer = AdamW(filter(lambda p: p.requires_grad, self.model.parameters()),
                           lr=phase.lr, weight_decay=self.config.weight_decay)
         steps = phase.epochs * len(self.train_loader)
@@ -54,8 +58,7 @@ class Trainer:
 
     def _train_epoch(self, optimizer, scheduler, phase: Phase, epoch: int) -> None:
         self.model.train()
-        if not phase.unfreeze_backbone:
-            ModelFactory.freeze_norm_statistics(self.model)
+        ModelFactory.freeze_norm_statistics(self.model)
         timer = Timer()
         running_loss = 0.0
         for batch in self.train_loader:
