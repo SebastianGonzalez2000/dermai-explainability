@@ -1,0 +1,26 @@
+20:01:11  model efficientnet-b0  device mps  seed 42
+20:01:13  data ready in 0m01s  splits {'train': 8011, 'val': 1002, 'test': 1002}
+20:01:13  phase 'head': 5 epochs, lr 1e-03, backbone frozen, 8967 trainable params
+20:02:07  [head] epoch 1  train_loss 1.6373  val_macro_f1 0.4788  val_bal_acc 0.5735  (0m53s)
+20:02:57  [head] epoch 2  train_loss 1.2257  val_macro_f1 0.4389  val_bal_acc 0.6192  (0m49s)
+20:03:46  [head] epoch 3  train_loss 1.1161  val_macro_f1 0.4950  val_bal_acc 0.6256  (0m49s)
+20:04:36  [head] epoch 4  train_loss 1.0469  val_macro_f1 0.4960  val_bal_acc 0.6479  (0m49s)
+20:05:26  [head] epoch 5  train_loss 1.0272  val_macro_f1 0.5064  val_bal_acc 0.6381  (0m49s)
+20:05:26  phase 'full': 15 epochs, lr 1e-04, backbone unfrozen, 4016515 trainable params
+20:07:34  [full] epoch 1  train_loss 1.5504  val_macro_f1 0.4096  val_bal_acc 0.5877  (2m07s)
+20:09:41  [full] epoch 2  train_loss 0.8873  val_macro_f1 0.5281  val_bal_acc 0.6458  (2m07s)
+20:11:50  [full] epoch 3  train_loss 0.5407  val_macro_f1 0.5517  val_bal_acc 0.6894  (2m08s)
+20:13:58  [full] epoch 4  train_loss 0.3706  val_macro_f1 0.6152  val_bal_acc 0.6833  (2m08s)
+20:16:05  [full] epoch 5  train_loss 0.2603  val_macro_f1 0.6556  val_bal_acc 0.6935  (2m07s)
+20:18:13  [full] epoch 6  train_loss 0.1828  val_macro_f1 0.6456  val_bal_acc 0.6780  (2m07s)
+20:20:21  [full] epoch 7  train_loss 0.1477  val_macro_f1 0.6866  val_bal_acc 0.6837  (2m07s)
+20:22:29  [full] epoch 8  train_loss 0.1108  val_macro_f1 0.6317  val_bal_acc 0.6729  (2m08s)
+20:24:38  [full] epoch 9  train_loss 0.0841  val_macro_f1 0.5832  val_bal_acc 0.6444  (2m08s)
+20:26:47  [full] epoch 10  train_loss 0.0658  val_macro_f1 0.6576  val_bal_acc 0.6700  (2m08s)
+20:28:55  [full] epoch 11  train_loss 0.0552  val_macro_f1 0.6849  val_bal_acc 0.6920  (2m08s)
+20:31:07  [full] epoch 12  train_loss 0.0443  val_macro_f1 0.6858  val_bal_acc 0.7391  (2m11s)
+20:33:16  [full] epoch 13  train_loss 0.0414  val_macro_f1 0.6182  val_bal_acc 0.6531  (2m08s)
+20:35:24  [full] epoch 14  train_loss 0.0377  val_macro_f1 0.6396  val_bal_acc 0.6772  (2m08s)
+20:37:32  [full] epoch 15  train_loss 0.0377  val_macro_f1 0.6872  val_bal_acc 0.6583  (2m07s)
+20:37:32  training complete in 36m18s, best val macro-F1 0.6872
+20:37:38  test  macro_f1 0.6464  bal_acc 0.6402

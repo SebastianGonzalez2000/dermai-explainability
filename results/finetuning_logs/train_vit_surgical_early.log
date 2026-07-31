@@ -1,0 +1,26 @@
+21:39:44  model vit-base-patch16-224-surgical-early  device mps  seed 42
+21:39:46  data ready in 0m01s  splits {'train': 8011, 'val': 1002, 'test': 1002}
+21:39:47  phase 'head': 5 epochs, lr 1e-03, backbone frozen, 5383 trainable params
+21:42:49  [head] epoch 1  train_loss 1.3539  val_macro_f1 0.5142  val_bal_acc 0.6770  (3m02s)
+21:45:48  [head] epoch 2  train_loss 0.9097  val_macro_f1 0.5910  val_bal_acc 0.6869  (2m58s)
+21:48:46  [head] epoch 3  train_loss 0.7782  val_macro_f1 0.5987  val_bal_acc 0.6931  (2m58s)
+21:55:50  [head] epoch 4  train_loss 0.7193  val_macro_f1 0.6252  val_bal_acc 0.7046  (3m05s)
+21:58:54  [head] epoch 5  train_loss 0.6675  val_macro_f1 0.6449  val_bal_acc 0.7128  (3m04s)
+21:58:54  phase 'early': 15 epochs, lr 2e-05, backbone early, 42532615 trainable params
+22:05:24  [early] epoch 1  train_loss 0.6287  val_macro_f1 0.6308  val_bal_acc 0.7413  (6m29s)
+22:11:47  [early] epoch 2  train_loss 0.5076  val_macro_f1 0.6851  val_bal_acc 0.7545  (6m23s)
+22:18:11  [early] epoch 3  train_loss 0.3388  val_macro_f1 0.7291  val_bal_acc 0.7750  (6m24s)
+22:24:37  [early] epoch 4  train_loss 0.2017  val_macro_f1 0.7600  val_bal_acc 0.7820  (6m25s)
+22:31:02  [early] epoch 5  train_loss 0.1335  val_macro_f1 0.7733  val_bal_acc 0.7934  (6m25s)
+22:37:28  [early] epoch 6  train_loss 0.0864  val_macro_f1 0.7663  val_bal_acc 0.7730  (6m25s)
+22:43:54  [early] epoch 7  train_loss 0.0547  val_macro_f1 0.7762  val_bal_acc 0.7885  (6m25s)
+22:50:21  [early] epoch 8  train_loss 0.0368  val_macro_f1 0.7525  val_bal_acc 0.7438  (6m27s)
+22:56:47  [early] epoch 9  train_loss 0.0253  val_macro_f1 0.7626  val_bal_acc 0.7487  (6m25s)
+23:03:13  [early] epoch 10  train_loss 0.0180  val_macro_f1 0.7577  val_bal_acc 0.7444  (6m25s)
+23:09:38  [early] epoch 11  train_loss 0.0128  val_macro_f1 0.7743  val_bal_acc 0.7498  (6m25s)
+23:16:05  [early] epoch 12  train_loss 0.0098  val_macro_f1 0.7655  val_bal_acc 0.7500  (6m26s)
+23:22:31  [early] epoch 13  train_loss 0.0077  val_macro_f1 0.7645  val_bal_acc 0.7509  (6m25s)
+23:28:57  [early] epoch 14  train_loss 0.0068  val_macro_f1 0.7646  val_bal_acc 0.7534  (6m26s)
+23:35:25  [early] epoch 15  train_loss 0.0059  val_macro_f1 0.7531  val_bal_acc 0.7359  (6m27s)
+23:35:25  training complete in 111m40s, best val macro-F1 0.7762
+23:35:45  test  macro_f1 0.6770  bal_acc 0.6964
