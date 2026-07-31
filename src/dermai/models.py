@@ -14,7 +14,7 @@ from .data import CLASSES, LABEL_TO_INDEX
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 
 BLOCK_PREFIXES = ("efficientnet.encoder.blocks.", "vit.layers.")
-BLOCK_SPANS = {"early": (0.0, 1 / 3), "middle": (1 / 3, 2 / 3), "late": (2 / 3, 1.0)}
+BLOCK_SPANS = {"early": (0.0, 0.5), "late": (0.5, 1.0)}
 
 
 def block_index(parameter_name: str) -> int | None:
@@ -51,7 +51,7 @@ class ModelFactory:
 
     @staticmethod
     def set_block_span_trainable(model: nn.Module, span: str) -> None:
-        """Train only the blocks in one third of the backbone's depth, plus the classifier head."""
+        """Train only the blocks in one half of the backbone's depth, plus the classifier head."""
         indices = {i for i in (block_index(name) for name, _ in model.named_parameters()) if i is not None}
         if not indices:
             raise ValueError("no indexed backbone blocks found, cannot apply a surgical span")
