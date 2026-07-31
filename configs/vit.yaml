@@ -1,13 +1,26 @@
-model_id: google/vit-base-patch16-224
-data_dir: data
-output_dir: outputs
-batch_size: 16
-num_workers: 0
-weight_decay: 0.01
+model_id: google/vit-base-patch16-224  # google/efficientnet-b0 or google/vit-base-patch16-224
+data_dir: data/
+output_dir: outputs/
+batch_size: 8
+dropout: 0.2
+drop_connect_rate: 0.
+augment: False
+num_workers: 4
+weight_decay: 0.1
 warmup_ratio: 0.1
+class_weighted_loss: false
 seed: 42
 device: auto
 
+experiment_tag: vit_unfreeze_all
+
 phases:
-  - {name: head, epochs: 5, lr: 1.0e-3, unfreeze_backbone: false}
-  - {name: full, epochs: 15, lr: 2.0e-5, unfreeze_backbone: true}
+  - name: warmup
+    epochs: 10
+    lr: 5.0e-2
+    unfreeze_depth: 0
+
+  - name: partial_unfreeze
+    epochs: 15
+    lr: 4.0e-5
+    unfreeze_depth: "all"
